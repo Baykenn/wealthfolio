@@ -500,4 +500,9 @@ export {
 } from "./crypto";
 
 // Custom asset logo overrides
-export { getAssetLogoUrl, removeAssetLogo, uploadAssetLogo } from "./asset-logo";
+export {
+  getAssetLogoDataUrl,
+  getAssetLogoUrl,
+  removeAssetLogo,
+  uploadAssetLogo,
+} from "./asset-logo";

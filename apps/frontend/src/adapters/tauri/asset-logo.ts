@@ -9,13 +9,17 @@ interface AssetLogoPayload {
   contentType: string;
 }
 
+export const getAssetLogoDataUrl = async (assetId: string): Promise<string | null> => {
+  const payload = await invoke<AssetLogoPayload | null>("get_asset_logo", { assetId });
+  if (!payload) return null;
+  return `data:${payload.contentType};base64,${payload.contentBase64}`;
+};
+
 export const getAssetLogoUrl = async (
   asset: { id: string; customLogoFilename?: string | null } | undefined,
 ): Promise<string | null> => {
   if (!asset?.customLogoFilename) return null;
-  const payload = await invoke<AssetLogoPayload | null>("get_asset_logo", { assetId: asset.id });
-  if (!payload) return null;
-  return `data:${payload.contentType};base64,${payload.contentBase64}`;
+  return getAssetLogoDataUrl(asset.id);
 };
 
 /** Opens a native file picker; `_file` is unused here (web-only parameter) but

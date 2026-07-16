@@ -11,6 +11,25 @@ export const getAssetLogoUrl = async (
   return logoPath(asset.id);
 };
 
+/**
+ * Fetches the logo bytes and returns a self-contained `data:` URL rather
+ * than the relative path `getAssetLogoUrl` returns — needed by callers
+ * (e.g. sandboxed addon iframes) that can't rely on sharing the app's own
+ * origin for a plain relative fetch.
+ */
+export const getAssetLogoDataUrl = async (assetId: string): Promise<string | null> => {
+  const res = await fetch(logoPath(assetId), { credentials: "same-origin" });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch logo (${res.status})`);
+  const blob = await res.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read logo blob"));
+    reader.readAsDataURL(blob);
+  });
+};
+
 export const uploadAssetLogo = async (assetId: string, file?: File): Promise<boolean> => {
   if (!file) throw new Error("A file is required to upload a logo");
   const formData = new FormData();
