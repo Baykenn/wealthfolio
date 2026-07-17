@@ -8,6 +8,10 @@ and this project adheres to
 
 ### Added
 
+- `NetworkRequest.timeoutSecs` — optional per-request timeout override (in
+  seconds) for the addon network broker. Defaults to 10s when omitted;
+  clamped server-side to a 120s maximum. Lets addons make longer-running
+  non-streaming calls (e.g. LLM completions) that exceed the default timeout.
 - Optional `ActivityImport.isExternal` boundary override for transfer and credit
   imports.
 - `ExchangeRatesAPI.getRatesForDates(pairs)` for batched date-specific FX-rate
