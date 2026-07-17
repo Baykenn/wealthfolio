@@ -55,6 +55,9 @@ impl SettingsRepositoryTrait for SettingsRepository {
                     settings.sync_enabled = value.parse().unwrap_or(true);
                 }
                 "default_return_metric" => settings.default_return_metric = value,
+                "show_target_allocation_card" => {
+                    settings.show_target_allocation_card = value.parse().unwrap_or(true);
+                }
                 _ => {} // Ignore unknown settings
             }
         }
@@ -176,6 +179,16 @@ impl SettingsRepositoryTrait for SettingsRepository {
                         .map_err(StorageError::from)?;
                 }
 
+                if let Some(show_target_allocation_card) = settings.show_target_allocation_card {
+                    diesel::replace_into(app_settings)
+                        .values(&AppSettingDB {
+                            setting_key: "show_target_allocation_card".to_string(),
+                            setting_value: show_target_allocation_card.to_string(),
+                        })
+                        .execute(conn)
+                        .map_err(StorageError::from)?;
+                }
+
                 Ok(())
             })
             .await
@@ -202,6 +215,7 @@ impl SettingsRepositoryTrait for SettingsRepository {
                     "menu_bar_visible" => "true",
                     "sync_enabled" => "true",
                     "default_return_metric" => "twr",
+                    "show_target_allocation_card" => "true",
                     _ => return Err(StorageError::from(diesel::result::Error::NotFound).into()),
                 };
                 Ok(default_value.to_string())

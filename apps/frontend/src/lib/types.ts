@@ -896,6 +896,7 @@ export interface Settings {
   autoUpdateCheckEnabled: boolean;
   menuBarVisible: boolean;
   syncEnabled: boolean;
+  showTargetAllocationCard: boolean;
 }
 
 export interface SettingsContextType {
