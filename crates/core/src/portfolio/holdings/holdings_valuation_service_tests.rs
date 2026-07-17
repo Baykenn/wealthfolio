@@ -493,6 +493,7 @@ mod tests {
                 preferred_provider: None,
                 exchange_mic: None,
                 classifications: None,
+                custom_logo_filename: None,
             })
         } else {
             None
