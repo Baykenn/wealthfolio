@@ -465,6 +465,7 @@ describe("AccountPage", () => {
 function createSettings(): Settings {
   return {
     theme: "light",
+    chartPalette: "sage",
     font: "font-sans",
     language: "en",
     baseCurrency: "USD",
