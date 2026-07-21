@@ -15,6 +15,7 @@ interface ExtendedSettingsContextType extends SettingsContextType {
       Pick<
         Settings,
         | "theme"
+        | "chartPalette"
         | "font"
         | "language"
         | "formattingRegion"
@@ -51,6 +52,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       Pick<
         Settings,
         | "theme"
+        | "chartPalette"
         | "font"
         | "language"
         | "formattingRegion"
@@ -187,6 +189,17 @@ const applySettingsToDocument = (newSettings: Settings) => {
   // Font classes
   document.body.classList.remove("font-mono", "font-sans", "font-serif");
   document.body.classList.add(newSettings.font);
+
+  // Chart palette
+  document.documentElement.classList.toggle("chart-amber", newSettings.chartPalette === "amber");
+  document.documentElement.classList.toggle(
+    "chart-newspaper",
+    newSettings.chartPalette === "newspaper",
+  );
+  document.documentElement.classList.toggle(
+    "chart-cyberpunk",
+    newSettings.chartPalette === "cyberpunk",
+  );
 
   // Cache pre-auth presentation settings so bootstrap UI does not flash defaults.
   try {

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub theme: String,
+    pub chart_palette: String,
     pub font: String,
     pub language: String,
     pub formatting_region: String,
@@ -23,6 +24,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             theme: "light".to_string(),
+            chart_palette: "sage".to_string(),
             font: "font-mono".to_string(),
             language: "en".to_string(),
             formatting_region: "system".to_string(),
@@ -42,6 +44,7 @@ impl Default for Settings {
 #[serde(rename_all = "camelCase")]
 pub struct SettingsUpdate {
     pub theme: Option<String>,
+    pub chart_palette: Option<String>,
     pub font: Option<String>,
     pub language: Option<String>,
     pub formatting_region: Option<String>,
