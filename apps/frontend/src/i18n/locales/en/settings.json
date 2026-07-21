@@ -92,7 +92,7 @@
   "appearance_menu_bar": "Show menu bar",
   "appearance_menu_bar_description": "Toggle to display the application menu bar.",
   "appearance_theme_required": "Please select a theme.",
-  "appearance_chart_palette_title": "Palette",
+  "appearance_chart_palette_title": "Style",
   "appearance_chart_palette_description": "Choose the color palette used throughout the app.",
   "appearance_chart_palette_required": "Please select a chart palette.",
   "appearance_font_error": "Select a font",

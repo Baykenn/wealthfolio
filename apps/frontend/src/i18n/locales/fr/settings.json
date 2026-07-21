@@ -92,7 +92,7 @@
   "appearance_menu_bar": "Afficher la barre de menu",
   "appearance_menu_bar_description": "Basculer pour afficher la barre de menu de l'application.",
   "appearance_theme_required": "Veuillez sélectionner un thème.",
-  "appearance_chart_palette_title": "Palette",
+  "appearance_chart_palette_title": "Style",
   "appearance_chart_palette_description": "Choisissez la palette de couleurs utilisée dans toute l'application.",
   "appearance_chart_palette_required": "Veuillez sélectionner une palette de graphiques.",
   "appearance_font_error": "Sélectionner une police",
