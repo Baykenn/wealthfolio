@@ -859,6 +859,7 @@ export interface QuoteUpdate {
 
 export interface Settings {
   theme: string;
+  chartPalette: "sage" | "amber" | "newspaper" | "cyberpunk";
   font: string;
   language: string;
   baseCurrency: string;

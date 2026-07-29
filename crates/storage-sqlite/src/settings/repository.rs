@@ -37,6 +37,7 @@ impl SettingsRepositoryTrait for SettingsRepository {
         for (key, value) in all_settings {
             match key.as_str() {
                 "theme" => settings.theme = value,
+                "chart_palette" => settings.chart_palette = value,
                 "font" => settings.font = value,
                 "language" => settings.language = value,
                 "base_currency" => settings.base_currency = value,
@@ -73,6 +74,16 @@ impl SettingsRepositoryTrait for SettingsRepository {
                         .values(&AppSettingDB {
                             setting_key: "theme".to_string(),
                             setting_value: theme.clone(),
+                        })
+                        .execute(conn)
+                        .map_err(StorageError::from)?;
+                }
+
+                if let Some(ref chart_palette) = settings.chart_palette {
+                    diesel::replace_into(app_settings)
+                        .values(&AppSettingDB {
+                            setting_key: "chart_palette".to_string(),
+                            setting_value: chart_palette.clone(),
                         })
                         .execute(conn)
                         .map_err(StorageError::from)?;
@@ -196,6 +207,7 @@ impl SettingsRepositoryTrait for SettingsRepository {
                 // Return default values for known settings
                 let default_value = match setting_key_param {
                     "theme" => "light",
+                    "chart_palette" => "sage",
                     "font" => "font-mono",
                     "language" => "en",
                     "timezone" => "",
