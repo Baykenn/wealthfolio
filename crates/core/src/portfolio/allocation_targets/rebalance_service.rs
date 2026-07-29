@@ -823,6 +823,10 @@ mod tests {
             category_name: category_id.to_string(),
             category_color: "#aaa".to_string(),
             value,
+            custom_logo_filename: holding
+                .instrument
+                .as_ref()
+                .and_then(|i| i.custom_logo_filename.clone()),
         }
     }
 
