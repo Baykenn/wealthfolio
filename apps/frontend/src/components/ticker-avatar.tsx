@@ -35,6 +35,18 @@ const getCashAvatarLabel = (symbol: string): string | null => {
 
 const getFallbackAvatarLabel = (symbol: string): string => symbol.slice(0, 4);
 
+/**
+ * A user-uploaded logo is already tightly cropped, so it should render
+ * edge-to-edge (`object-contain` only). The bundled ticker-logos fallback has
+ * more surrounding whitespace baked into the source images and needs padding
+ * to avoid looking oversized in the circle. Call sites that pass their own
+ * `imageClassName` must derive it from this so the two cases don't diverge.
+ */
+export const getTickerLogoImageClassName = (
+  hasCustomLogo: boolean,
+  fallbackPadding: string,
+): string => (hasCustomLogo ? "object-contain" : `object-contain ${fallbackPadding}`);
+
 export const TickerAvatar = ({
   symbol,
   className = "size-8",
@@ -67,7 +79,7 @@ export const TickerAvatar = ({
   // way the aspect ratio is preserved, unlike `object-cover` (which crops)
   // or leaving `object-fit` unset (which stretches to fill).
   const resolvedImageClassName =
-    imageClassName ?? (customLogoUrl ? "object-contain" : "object-contain p-2");
+    imageClassName ?? getTickerLogoImageClassName(!!customLogoUrl, "p-2");
 
   useEffect(() => {
     setLogoUrl(primaryLogoUrl);

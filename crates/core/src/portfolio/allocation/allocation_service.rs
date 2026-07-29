@@ -180,6 +180,9 @@ impl AllocationService {
                 if existing_summary.unit_price.is_none() {
                     existing_summary.unit_price = summary.unit_price;
                 }
+                if existing_summary.custom_logo_filename.is_none() {
+                    existing_summary.custom_logo_filename = summary.custom_logo_filename;
+                }
                 *existing_value += value;
             } else {
                 non_cash_index_by_id.insert(summary.id.clone(), merged.len());
@@ -258,12 +261,16 @@ impl AllocationService {
             .unwrap_or_else(|| (category_id.to_string(), fallback_color.to_string()))
     }
 
-    fn holding_display(holding: &Holding) -> (String, String, String) {
+    fn holding_display(holding: &Holding) -> (String, String, String, Option<String>) {
         let asset_id = holding
             .instrument
             .as_ref()
             .map(|instrument| instrument.id.clone())
             .unwrap_or_else(|| holding.id.clone());
+        let custom_logo_filename = holding
+            .instrument
+            .as_ref()
+            .and_then(|instrument| instrument.custom_logo_filename.clone());
 
         if holding.holding_type == HoldingType::Cash {
             let symbol = holding.local_currency.clone();
@@ -271,6 +278,7 @@ impl AllocationService {
                 asset_id,
                 symbol.clone(),
                 format!("Cash ({})", holding.local_currency),
+                custom_logo_filename,
             );
         }
 
@@ -285,7 +293,7 @@ impl AllocationService {
             .and_then(|instrument| instrument.name.clone())
             .unwrap_or_else(|| symbol.clone());
 
-        (asset_id, symbol, name)
+        (asset_id, symbol, name, custom_logo_filename)
     }
 
     fn contribution_shares_for_holding(
@@ -880,7 +888,7 @@ impl AllocationService {
                 &assignments_by_asset,
                 cash_overrides,
             );
-            let (asset_id, symbol, name) = Self::holding_display(holding);
+            let (asset_id, symbol, name, custom_logo_filename) = Self::holding_display(holding);
             let mut value_by_category: BTreeMap<String, Decimal> = BTreeMap::new();
             for share in shares {
                 *value_by_category.entry(share.category_id).or_default() +=
@@ -908,6 +916,7 @@ impl AllocationService {
                     category_name,
                     category_color,
                     value,
+                    custom_logo_filename: custom_logo_filename.clone(),
                 });
             }
         }
@@ -1016,7 +1025,7 @@ impl AllocationService {
             }
 
             let matched_value = holding.market_value.base * matched_share;
-            let (asset_id, symbol, name) = Self::holding_display(holding);
+            let (asset_id, symbol, name, custom_logo_filename) = Self::holding_display(holding);
             matched_values.push((
                 HoldingSummary {
                     id: asset_id,
@@ -1029,6 +1038,7 @@ impl AllocationService {
                     currency: base_currency.to_string(),
                     weight_in_category: Decimal::ZERO,
                     unit_price: holding.price,
+                    custom_logo_filename,
                 },
                 matched_value,
             ));

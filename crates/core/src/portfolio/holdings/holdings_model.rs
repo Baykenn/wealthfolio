@@ -73,6 +73,8 @@ pub struct HoldingSummary {
     /// Use this for trade sizing instead of market_value/quantity,
     /// which gives a wrong result when market_value is weighted across categories.
     pub unit_price: Option<Decimal>,
+    /// User-uploaded logo override filename, if one has been set on the asset
+    pub custom_logo_filename: Option<String>,
 }
 
 /// Position view model for frontend display with daily and total performance
