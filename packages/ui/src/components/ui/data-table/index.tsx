@@ -37,9 +37,35 @@ interface DataTableProps<TData, TValue> {
   manualPagination?: boolean;
   scrollable?: boolean;
   showColumnToggle?: boolean;
+  toolbarView?: React.ReactNode;
+  toolbarFilters?: React.ReactNode;
   toolbarActions?: React.ReactNode;
   /** Extra className applied to each body row (e.g. to host a per-row background decoration). */
   rowClassName?: string | ((row: TData) => string);
+  pinRowsToTop?: (row: TData) => boolean;
+}
+
+/**
+ * Ids of the columns tanstack would let you sort, resolved the same way it resolves them
+ * when it builds the table: `id ?? accessorKey.replaceAll(".", "_") ?? string header`,
+ * sortable only when the column has an accessor and sorting is not disabled. Group defs
+ * carry no accessor, so we descend into their children instead.
+ */
+function collectSortableColumnIds<TData, TValue>(columns: ColumnDef<TData, TValue>[], ids: string[] = []): string[] {
+  for (const column of columns) {
+    const children = "columns" in column ? column.columns : undefined;
+    if (children?.length) {
+      collectSortableColumnIds(children, ids);
+      continue;
+    }
+    if (column.enableSorting === false) continue;
+    const accessorKey = "accessorKey" in column ? String(column.accessorKey) : undefined;
+    if (!("accessorFn" in column) && accessorKey === undefined) continue;
+    const id =
+      column.id ?? accessorKey?.replaceAll(".", "_") ?? (typeof column.header === "string" ? column.header : undefined);
+    if (id) ids.push(id);
+  }
+  return ids;
 }
 
 export function DataTable<TData, TValue>({
@@ -54,8 +80,11 @@ export function DataTable<TData, TValue>({
   storageKey,
   scrollable = false,
   showColumnToggle = false,
+  toolbarView,
+  toolbarFilters,
   toolbarActions,
   rowClassName,
+  pinRowsToTop,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [storedColumnVisibility, setColumnVisibility] = storageKey
@@ -68,9 +97,25 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = storageKey
     ? usePersistentState<ColumnFiltersState>(`${storageKey}:column-filters`, defaultColumnFilters || [])
     : React.useState<ColumnFiltersState>(defaultColumnFilters || []);
-  const [sorting, setSorting] = storageKey
+  const [storedSorting, setSorting] = storageKey
     ? usePersistentState<SortingState>(`${storageKey}:sorting`, defaultSorting || [])
     : React.useState<SortingState>(defaultSorting || []);
+
+  // Views sharing one storageKey can render different column sets, so a stored sort
+  // may reference a column that is absent right now. Fall back for this render only —
+  // rewriting the stored value would discard the choice the user made in the other view.
+  const sortableColumnIdsKey = collectSortableColumnIds(columns).join("\0");
+  // Serialised so the memo below stays stable: callers pass defaultSorting as a literal.
+  const defaultSortingKey = JSON.stringify(defaultSorting ?? []);
+
+  const sorting = React.useMemo(() => {
+    const sortableColumnIds = new Set(sortableColumnIdsKey.split("\0").filter(Boolean));
+    const supported = storedSorting.filter(({ id }) => sortableColumnIds.has(id));
+
+    if (supported.length === storedSorting.length) return storedSorting;
+    if (supported.length > 0) return supported;
+    return (JSON.parse(defaultSortingKey) as SortingState).filter(({ id }) => sortableColumnIds.has(id));
+  }, [defaultSortingKey, sortableColumnIdsKey, storedSorting]);
 
   const table = useReactTable({
     data,
@@ -91,7 +136,9 @@ export function DataTable<TData, TValue>({
 
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
+    // Resolve the updater against the sorting the table is actually showing, not the
+    // stored value it may have fallen back from.
+    onSortingChange: (updater) => setSorting(typeof updater === "function" ? updater(sorting) : updater),
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
@@ -102,6 +149,11 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const rows = table.getRowModel().rows;
+  const displayRows = pinRowsToTop
+    ? [...rows.filter((row) => pinRowsToTop(row.original)), ...rows.filter((row) => !pinRowsToTop(row.original))]
+    : rows;
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 shrink-0">
@@ -109,6 +161,8 @@ export function DataTable<TData, TValue>({
           table={table}
           searchBy={searchBy}
           filters={filters}
+          viewControl={toolbarView}
+          additionalFilters={toolbarFilters}
           showColumnToggle={showColumnToggle}
           actions={toolbarActions}
         />
@@ -129,8 +183,8 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {displayRows.length ? (
+              displayRows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

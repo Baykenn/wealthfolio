@@ -1,5 +1,5 @@
 import type { CategoryAllocation, NetWorthHistoryPoint, TaxonomyAllocation } from "@/lib/types";
-import { formatPercent } from "@/lib/utils";
+import type { FormattingApi } from "@wealthfolio/ui";
 
 // Net-worth theme accent — matches the history chart's line color and follows
 // the active chart palette (see globals.css). Value numbers use semantic
@@ -153,9 +153,12 @@ export function deriveChange(series: number[], isLiability: boolean): Change {
 }
 
 /** Percent is a ratio (0.145 = 14.5%); drop decimals for very large swings. */
-export function formatChangePercent(percent: number): string {
+export function formatChangePercent(
+  percent: number,
+  formatting: Pick<FormattingApi, "formatPercent">,
+): string {
   const abs = Math.abs(percent);
-  return formatPercent(abs, { digits: abs >= 10 ? 0 : 1, signDisplay: "never" });
+  return formatting.formatPercent(abs, { digits: abs >= 10 ? 0 : 1, signDisplay: "never" });
 }
 
 const MS_PER_DAY = 86_400_000;

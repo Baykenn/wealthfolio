@@ -1,11 +1,13 @@
 import { isDesktop, logger } from "@/adapters";
+import { setAddonLocalizationSnapshot } from "@/addons/iframe/addon-sandbox-localization";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
-import i18n from "@/i18n/i18n";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { useSettings } from "@/hooks/use-settings";
 import { useSettingsMutation } from "@/hooks/use-settings-mutation";
+import i18n, { LANGUAGE_STORAGE_KEY } from "@/i18n/i18n";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { Settings, SettingsContextType } from "@/lib/types";
+import { FormattingProvider, resolveFormattingLocale } from "@wealthfolio/ui";
 
 interface ExtendedSettingsContextType extends SettingsContextType {
   updateSettings: (
@@ -16,6 +18,7 @@ interface ExtendedSettingsContextType extends SettingsContextType {
         | "chartPalette"
         | "font"
         | "language"
+        | "formattingRegion"
         | "baseCurrency"
         | "defaultReturnMetric"
         | "timezone"
@@ -52,6 +55,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         | "chartPalette"
         | "font"
         | "language"
+        | "formattingRegion"
         | "baseCurrency"
         | "defaultReturnMetric"
         | "timezone"
@@ -96,8 +100,37 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     accountsGrouped,
     setAccountsGrouped,
   };
+  const formattingRegion = settings ? settings.formattingRegion : "system";
+  const uiLocale = settings ? settings.language : DEFAULT_LOCALE;
+  const resolvedFormattingLocale = resolveFormattingLocale(formattingRegion);
+  const formattingTimezone = settings?.timezone || undefined;
 
-  return <SettingsContext.Provider value={contextValue}>{children}</SettingsContext.Provider>;
+  useEffect(() => {
+    setAddonLocalizationSnapshot({
+      locale: resolvedFormattingLocale,
+      uiLocale,
+      timezone: formattingTimezone,
+    });
+  }, [resolvedFormattingLocale, uiLocale, formattingTimezone]);
+
+  if (settings && !formattingRegion) {
+    throw new Error("Loaded settings are missing the required formatting region");
+  }
+  if (settings && !uiLocale) {
+    throw new Error("Loaded settings are missing the required UI language");
+  }
+
+  return (
+    <SettingsContext.Provider value={contextValue}>
+      <FormattingProvider
+        locale={formattingRegion}
+        uiLocale={uiLocale}
+        timezone={formattingTimezone}
+      >
+        {children}
+      </FormattingProvider>
+    </SettingsContext.Provider>
+  );
 }
 
 export function useSettingsContext() {
@@ -151,6 +184,7 @@ const applySettingsToDocument = (newSettings: Settings) => {
     });
   }
   document.documentElement.setAttribute("lang", language);
+  document.documentElement.setAttribute("dir", i18n.dir(language));
 
   // Font classes
   document.body.classList.remove("font-mono", "font-sans", "font-serif");
@@ -167,9 +201,10 @@ const applySettingsToDocument = (newSettings: Settings) => {
     newSettings.chartPalette === "cyberpunk",
   );
 
-  // Cache theme/font in localStorage for pre-auth usage (login screen)
+  // Cache pre-auth presentation settings so bootstrap UI does not flash defaults.
   try {
     localStorage.setItem("wealthfolio-theme", newSettings.theme);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   } catch {
     // noop – localStorage may be unavailable
   }
