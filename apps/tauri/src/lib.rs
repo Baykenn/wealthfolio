@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod asset_logo_import;
 mod commands;
 mod context;
 mod domain_events;
@@ -154,6 +155,15 @@ mod desktop {
 
         // Make context available to all commands
         handle.manage(Arc::clone(&context));
+
+        // Import custom asset logos left by the pre-3.8 file-based logo store (runs once)
+        {
+            let import_dir = app_data_dir.to_string();
+            let logo_service = context.asset_logo_service();
+            tauri::async_runtime::spawn(async move {
+                asset_logo_import::import_pending_logos(&import_dir, logo_service).await;
+            });
+        }
 
         // Embedded MCP server: clear any stale lock file from an unclean
         // shutdown, then auto-start when enabled + auto-start are both set.
