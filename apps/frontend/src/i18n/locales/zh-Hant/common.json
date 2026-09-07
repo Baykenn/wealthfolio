@@ -316,7 +316,11 @@
     "try_open_changelog_manually": "請在瀏覽器中手動開啟變更記錄。",
     "all_portfolio": "整體投資組合",
     "calculation_notes_other": "計算說明（{{count}}）",
-    "calculation_notes_one": "計算說明（{{count}}）"
+    "calculation_notes_one": "計算說明（{{count}}）",
+    "chart_palette_sage_label": "鼠尾草綠",
+    "chart_palette_amber_label": "琥珀色",
+    "chart_palette_newspaper_label": "報紙灰",
+    "chart_palette_cyberpunk_label": "賽博"
   },
   "globalEvents": {
     "syncingMarket": "正在同步市場資料…",

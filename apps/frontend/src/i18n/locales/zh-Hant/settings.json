@@ -519,7 +519,8 @@
       "ai_providers": "AI 服務供應商",
       "agent_access": "AI 代理程式存取",
       "addons": "擴充功能",
-      "about": "關於"
+      "about": "關於",
+      "target_allocation": "目標配置"
     },
     "subtitles": {
       "general": "幣別、匯率與更新",
@@ -536,7 +537,8 @@
       "ai_providers": "為投資組合分析設定 AI",
       "agent_access": "MCP 伺服器與代理程式權杖",
       "addons": "擴充 Wealthfolio 功能",
-      "about": "應用程式資訊"
+      "about": "應用程式資訊",
+      "target_allocation": "儀表板卡片可見性"
     }
   },
   "timezone_title": "時區",
@@ -1492,5 +1494,15 @@
   "addon_rating_characters_one": "{{count}}／500 個字元",
   "addon_store_filter_all_one": "全部（{{count}}）",
   "addon_store_filter_uninstalled_one": "未安裝（{{count}}）",
-  "addon_store_showing_one": "顯示 {{total}} 個擴充功能中的 {{count}} 個"
+  "addon_store_showing_one": "顯示 {{total}} 個擴充功能中的 {{count}} 個",
+  "appearance_chart_palette_title": "樣式",
+  "appearance_chart_palette_description": "選擇整個應用程式中使用的視覺樣式。",
+  "appearance_chart_palette_required": "請選擇一個圖表配色。",
+  "target_allocation_title": "目標配置",
+  "target_allocation_description": "控制目標配置卡片是否顯示在儀表板上。",
+  "target_allocation_show_label": "在儀表板上顯示",
+  "target_allocation_show_description": "在投資組合概覽儀表板上顯示目標配置卡片。",
+  "target_allocation_manage_label": "管理目標配置",
+  "target_allocation_manage_description": "建立、編輯和檢視你的目標配置。",
+  "target_allocation_manage_button": "管理目標配置"
 }
