@@ -885,6 +885,9 @@ export interface QuoteUpdate {
 }
 
 export interface Settings {
+  insightsOverviewLayout?: Record<string, unknown> | null;
+  /** Read-only restore state, absent on older backends. */
+  restoreReconnectRequired?: boolean;
   theme: string;
   chartPalette: "sage" | "amber" | "newspaper" | "cyberpunk";
   font: string;
@@ -897,7 +900,6 @@ export interface Settings {
   autoUpdateCheckEnabled: boolean;
   menuBarVisible: boolean;
   syncEnabled: boolean;
-  showTargetAllocationCard: boolean;
 }
 
 export interface SettingsContextType {

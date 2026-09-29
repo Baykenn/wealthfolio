@@ -8,10 +8,9 @@ and this project adheres to
 
 ### Added
 
-- `NetworkRequest.timeoutSecs` — optional per-request timeout override (in
-  seconds) for the addon network broker. Defaults to 10s when omitted;
-  clamped server-side to a 120s maximum. Lets addons make longer-running
-  non-streaming calls (e.g. LLM completions) that exceed the default timeout.
+- `NetworkRequest.timeoutSecs` for longer-running addon HTTP requests. Defaults
+  to 10 seconds; positive integer values are capped server-side at 120 seconds.
+
 - Optional `ActivityImport.isExternal` boundary override for transfer and credit
   imports.
 - `ExchangeRatesAPI.getRatesForDates(pairs)` for batched date-specific FX-rate
@@ -22,6 +21,11 @@ and this project adheres to
   Wealthfolio's categorization-rules engine. Requires a Wealthfolio release that
   ships this bridge (unreleased at the time of writing). See the
   [Spend Categorization API reference](../../docs/addons/addon-api-reference.md#spend-categorization-api).
+- `SpendingAPI.getReport()` and `SpendingAPI.searchCashActivities()` for
+  read-only aggregate reports and categorized transaction searches. Transaction
+  search requires the high-risk `activities.searchCashActivities` permission.
+  Reports include `baseCurrency` to identify the currency of all monetary
+  amounts.
 - `registerTranslations()` and `useAddonTranslation()` for translating addon UI
   strings. Resources live on a dedicated i18next instance inside the addon
   sandbox, isolated from the host catalog; the language follows the host

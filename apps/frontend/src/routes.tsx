@@ -1,3 +1,4 @@
+import { RestoredPortfolioNotice } from "@/features/database-recovery/restored-portfolio-notice";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
@@ -37,7 +38,6 @@ import AddonSettingsPage from "./pages/settings/addons/addon-settings";
 import AgentAccessPage from "./pages/settings/agent-access/agent-access-page";
 import AiProvidersPage from "./pages/settings/ai-providers/ai-providers-page";
 import ContributionLimitPage from "./pages/settings/contribution-limits/contribution-limits-page";
-import TargetAllocationSettingsPage from "./pages/settings/target-allocation/target-allocation-page";
 import ExportSettingsPage from "./pages/settings/exports/exports-page";
 import GeneralSettingsPage from "./pages/settings/general/general-page";
 import MarketDataImportPage from "./pages/settings/market-data/market-data-import-page";
@@ -84,6 +84,7 @@ export function AppRoutes() {
   return (
     <BrowserRouter>
       <NavigationEventBridge />
+      <RestoredPortfolioNotice />
       <Routes>
         {/* QR Scanner - No layout for fullscreen camera access */}
         {/* <Route path="/qr-scanner" element={<QRScannerPage />} /> */}
@@ -139,7 +140,6 @@ export function AppRoutes() {
             <Route path="about" element={<AboutSettingsPage />} />
             <Route path="exports" element={<ExportSettingsPage />} />
             <Route path="contribution-limits" element={<ContributionLimitPage />} />
-            <Route path="target-allocation" element={<TargetAllocationSettingsPage />} />
             <Route path="spending" element={<SpendingSettingsPage />} />
             <Route path="spending/categories" element={<SpendingSettingsCategoriesPage />} />
             <Route path="spending/events" element={<SpendingSettingsEventsPage />} />
