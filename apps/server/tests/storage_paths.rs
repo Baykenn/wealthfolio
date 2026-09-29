@@ -11,6 +11,8 @@ fn worker(directory: &Path, mode: &str) -> Command {
         .args(["--exact", "storage_worker", "--nocapture"])
         .current_dir(directory)
         .env_clear()
+        // Windows needs SystemRoot for OS entropy (bcrypt.dll); unset elsewhere.
+        .envs(std::env::var_os("SystemRoot").map(|root| ("SystemRoot", root)))
         .env("WF_STORAGE_TEST_MODE", mode)
         .env("WF_LISTEN_ADDR", "127.0.0.1:0")
         .env("WF_SECRET_KEY", KEY)
@@ -88,7 +90,11 @@ fn conflicting_paths_fail_in_startup_and_offline_commands_without_writes() {
         vec!["db", "restore", "missing.wfbackup", "--yes"],
     ] {
         let mut command = Command::new(env!("CARGO_BIN_EXE_wealthfolio-server"));
-        command.args(args).current_dir(temp.path()).env_clear();
+        command
+            .args(args)
+            .current_dir(temp.path())
+            .env_clear()
+            .envs(std::env::var_os("SystemRoot").map(|root| ("SystemRoot", root)));
         commands.push(command);
     }
     for command in &mut commands {

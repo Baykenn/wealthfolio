@@ -12,6 +12,8 @@ fn cli(dir: &Path, operation: &str) -> Command {
         .args(["db", operation])
         .current_dir(dir)
         .env_clear()
+        // Windows needs SystemRoot for OS entropy (bcrypt.dll); unset elsewhere.
+        .envs(std::env::var_os("SystemRoot").map(|root| ("SystemRoot", root)))
         .env("WF_DB_PATH", dir.join("app.db"));
     command
 }
