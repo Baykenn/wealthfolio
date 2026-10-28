@@ -31,6 +31,7 @@ export const themeOrder = [
   "signature",
   "ember",
   "cupertino",
+  "amber",
   "newspaper",
   "cyber",
   "terminal",
