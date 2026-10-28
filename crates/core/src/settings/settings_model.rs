@@ -5,13 +5,27 @@ use std::collections::BTreeMap;
 
 pub const INSIGHTS_OVERVIEW_LAYOUT_KEY: &str = "insights_overview_layout";
 pub const CURRENCY_FORMATTING_REGIONS_KEY: &str = "currency_formatting_regions";
+/// Selected theme (palette and shape). Device-local: sync shares only the keys it
+/// lists. The frontend owns the theme list and shows Classic for an ID it does
+/// not know, so an ID saved by a newer version survives an older one.
+pub const THEME_ID_KEY: &str = "theme_id";
+pub const DEFAULT_THEME_ID: &str = "classic";
+/// Text size: a name the frontend maps to a root font size. Device-local like the
+/// theme, and the frontend shows the default size for a name it does not know.
+/// Unset until the user picks one, so the frontend can start from the device's
+/// own font size.
+pub const TEXT_SIZE_KEY: &str = "text_size";
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
+    #[serde(default = "default_theme_id")]
+    pub theme_id: String,
+    /// Appearance mode: light, dark or system.
     pub theme: String,
-    pub chart_palette: String,
     pub font: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text_size: Option<String>,
     pub language: String,
     pub formatting_region: String,
     /// Formatting regions for amounts in specific currencies, keyed by currency
@@ -33,12 +47,17 @@ pub struct Settings {
     pub insights_overview_layout: Option<serde_json::Map<String, serde_json::Value>>,
 }
 
+fn default_theme_id() -> String {
+    DEFAULT_THEME_ID.to_string()
+}
+
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            theme_id: default_theme_id(),
             theme: "light".to_string(),
-            chart_palette: "sage".to_string(),
             font: "font-mono".to_string(),
+            text_size: None,
             language: "en".to_string(),
             formatting_region: "system".to_string(),
             currency_formatting_regions: BTreeMap::new(),
@@ -58,9 +77,10 @@ impl Default for Settings {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SettingsUpdate {
+    pub theme_id: Option<String>,
     pub theme: Option<String>,
-    pub chart_palette: Option<String>,
     pub font: Option<String>,
+    pub text_size: Option<String>,
     pub language: Option<String>,
     pub formatting_region: Option<String>,
     /// Replaces the whole map; an empty map removes every override.

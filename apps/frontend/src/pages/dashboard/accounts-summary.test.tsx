@@ -99,7 +99,6 @@ const mockUseQuery = vi.mocked(useQuery);
 
 const mockSettings: Settings = {
   theme: "light",
-  chartPalette: "sage",
   font: "font-sans",
   language: "en",
   formattingRegion: "US",

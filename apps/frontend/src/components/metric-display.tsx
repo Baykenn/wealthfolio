@@ -100,7 +100,8 @@ export const MetricDisplay: React.FC<MetricDisplayProps> = ({
   const labelContent = labelComponent ?? (
     <>
       <div className="text-muted-foreground flex w-full items-center justify-center text-xs">
-        <span className="text-center">{label}</span>
+        {/* A word wider than a narrow tile breaks rather than being cut off. */}
+        <span className="min-w-0 text-center wrap-break-word">{label}</span>
       </div>
       <Popover>
         <PopoverTrigger
@@ -167,7 +168,7 @@ export const MetricDisplay: React.FC<MetricDisplayProps> = ({
           to="/health"
           title={emptyReason}
           aria-label={t("common:component.open_health_center_for", { label })}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring text-2xs relative z-20 line-clamp-2 max-w-[11rem] rounded-sm text-center leading-tight underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring text-2xs relative z-20 line-clamp-2 max-w-[11rem] rounded-sm text-center leading-tight underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           {emptyReason}
         </Link>

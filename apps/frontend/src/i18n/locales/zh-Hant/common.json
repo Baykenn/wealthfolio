@@ -245,7 +245,6 @@
     "asset_type_option": "選擇權",
     "asset_type_metal": "金屬（商品）",
     "asset_type_other": "其他",
-    "select_currency": "選取幣別…",
     "select_symbol": "選取代號…",
     "symbol_type_security": "有價證券",
     "symbol_type_crypto": "加密貨幣",
@@ -318,11 +317,7 @@
     "try_open_changelog_manually": "請在瀏覽器中手動開啟變更記錄。",
     "all_portfolio": "整體投資組合",
     "calculation_notes_other": "計算說明（{{count}}）",
-    "calculation_notes_one": "計算說明（{{count}}）",
-    "chart_palette_sage_label": "鼠尾草綠",
-    "chart_palette_amber_label": "琥珀色",
-    "chart_palette_newspaper_label": "報紙灰",
-    "chart_palette_cyberpunk_label": "賽博"
+    "calculation_notes_one": "計算說明（{{count}}）"
   },
   "globalEvents": {
     "syncingMarket": "正在同步市場資料…",

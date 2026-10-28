@@ -26,7 +26,7 @@ use wealthfolio_core::{
     limits::ContributionLimitService,
     portfolio::{
         allocation::AllocationService,
-        allocation_targets::{AllocationTargetService, DriftService, RebalanceService},
+        allocation_targets::{AllocationTargetService, AllocationWorksheetService, DriftService},
         holdings::{HoldingsService, HoldingsValuationService},
         income::IncomeService,
         net_worth::NetWorthService,
@@ -367,7 +367,7 @@ async fn build_context(
     let categorization_rules_service = Arc::new(
         wealthfolio_spending::categorization_rules::CategorizationRulesService::new(
             categorization_rules_repo,
-            activity_repository.clone(),
+            cash_activity_service.clone(),
             activity_taxonomy_assignment_service.clone(),
         ),
     );
@@ -597,11 +597,16 @@ async fn build_context(
         .with_holdings_service(holdings_service.clone())
         .with_taxonomy_service(taxonomy_service.clone()),
     );
-    let rebalance_service = Arc::new(RebalanceService::new(
+    let allocation_worksheet_service = Arc::new(AllocationWorksheetService::new(
         allocation_target_service.clone(),
         drift_service.clone(),
         allocation_service.clone(),
         holdings_service.clone(),
+        account_service.clone(),
+        asset_service.clone(),
+        taxonomy_service.clone(),
+        quote_service.clone(),
+        fx_service.clone(),
     ));
 
     let alternative_asset_repository = Arc::new(AlternativeAssetRepository::new(
@@ -703,6 +708,10 @@ async fn build_context(
         cash_activity_service.clone(),
         activity_taxonomy_assignment_service.clone(),
         categorization_rules_service.clone(),
+        budget_service.clone(),
+        events_service.clone(),
+        spending_analytics_service.clone(),
+        spending_insight_service.clone(),
     ));
     let agent_environment: Arc<dyn wealthfolio_agent_tools::AgentEnvironment> =
         ai_environment.clone();
@@ -778,7 +787,7 @@ async fn build_context(
             allocation_service,
             allocation_target_service,
             drift_service,
-            rebalance_service,
+            allocation_worksheet_service,
             valuation_service,
             portfolio_coordinator,
             net_worth_service,

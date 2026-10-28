@@ -119,6 +119,8 @@ export {
   saveActivities,
   searchActivities,
   updateActivity,
+  reviewActivitiesSplitEffects,
+  reviewInternalTransferPairSplitEffects,
 } from "../shared/activities";
 export { parseCsv } from "./activities";
 
@@ -385,10 +387,11 @@ export {
 // Allocation Target Commands
 export {
   archiveAllocationTarget,
-  calculateRebalancePlan,
+  calculateAllocationWorksheet,
   canonicalizeEligibleAssetIds,
   createAllocationTarget,
   deleteAllocationTarget,
+  generateCalculatedAdjustments,
   getAllocationTargetDrift,
   getAllocationTarget,
   listAllocationTargetWeights,
@@ -416,6 +419,7 @@ export {
   listAgentAuditLog,
   purgeAgentAuditLog,
   deleteAgentAccessToken,
+  updateAgentAccessTokenScopes,
   setMcpAuditEnabled,
   setMcpEnabled,
   setMcpAutoStart,
@@ -429,6 +433,7 @@ export { streamAiChat } from "./ai-streaming";
 // Event Listeners (web-specific SSE implementation)
 export {
   listenAssetClassificationsChanged,
+  listenBackButton,
   listenBrokerSyncComplete,
   listenBrokerSyncError,
   listenBrokerSyncStart,

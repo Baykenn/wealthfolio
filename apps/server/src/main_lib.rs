@@ -156,8 +156,10 @@ pub struct AppState {
     >,
     pub drift_service:
         Arc<dyn wealthfolio_core::portfolio::allocation_targets::DriftServiceTrait + Send + Sync>,
-    pub rebalance_service: Arc<
-        dyn wealthfolio_core::portfolio::allocation_targets::RebalanceServiceTrait + Send + Sync,
+    pub allocation_worksheet_service: Arc<
+        dyn wealthfolio_core::portfolio::allocation_targets::AllocationWorksheetServiceTrait
+            + Send
+            + Sync,
     >,
     pub pat_repository: Arc<PatRepository>,
     pub mcp_audit_repository: Arc<McpAuditRepository>,
@@ -733,14 +735,21 @@ async fn initialize_profile_state(
         .with_holdings_service(holdings_service.clone())
         .with_taxonomy_service(taxonomy_service.clone()),
     );
-    let rebalance_service: Arc<
-        dyn wealthfolio_core::portfolio::allocation_targets::RebalanceServiceTrait + Send + Sync,
+    let allocation_worksheet_service: Arc<
+        dyn wealthfolio_core::portfolio::allocation_targets::AllocationWorksheetServiceTrait
+            + Send
+            + Sync,
     > = Arc::new(
-        wealthfolio_core::portfolio::allocation_targets::RebalanceService::new(
+        wealthfolio_core::portfolio::allocation_targets::AllocationWorksheetService::new(
             allocation_target_service.clone(),
             drift_service.clone(),
             allocation_service.clone(),
             holdings_service.clone(),
+            account_service.clone(),
+            asset_service.clone(),
+            taxonomy_service.clone(),
+            quote_service.clone(),
+            fx_service.clone(),
         ),
     );
 
@@ -868,7 +877,7 @@ async fn initialize_profile_state(
     let categorization_rules_service = Arc::new(
         wealthfolio_spending::categorization_rules::CategorizationRulesService::new(
             categorization_rules_repo,
-            activity_repository.clone(),
+            cash_activity_service.clone(),
             activity_taxonomy_assignment_service.clone(),
         ),
     );
@@ -1017,6 +1026,10 @@ async fn initialize_profile_state(
         cash_activity_service.clone(),
         activity_taxonomy_assignment_service.clone(),
         categorization_rules_service.clone(),
+        budget_service.clone(),
+        events_service.clone(),
+        spending_analytics_service.clone(),
+        spending_insight_service.clone(),
     ));
     let agent_environment: Arc<dyn wealthfolio_agent_tools::AgentEnvironment> =
         ai_environment.clone();
@@ -1175,7 +1188,7 @@ async fn initialize_profile_state(
         spending_insight_service,
         allocation_target_service,
         drift_service,
-        rebalance_service,
+        allocation_worksheet_service,
         pat_repository,
         mcp_audit_repository,
         agent_environment,

@@ -340,7 +340,16 @@ export interface ActivityCreate {
 /**
  * Payload for updating an EXISTING activity.
  */
+export interface ActivitySplitEffect {
+  activityId: string;
+  removedSplits: number;
+  hasRetainedCategoryAssignment: boolean;
+  fingerprint: string;
+}
+
 export interface ActivityUpdate {
+  unlinkTransferPairId?: string;
+  splitReview?: ActivitySplitEffect[];
   id: string;
   accountId: string;
   activityType: string;
@@ -388,6 +397,7 @@ export interface ActivityBulkMutationResult {
 }
 
 export interface InternalTransferPairRequest {
+  splitReview?: ActivitySplitEffect[];
   editedActivityId?: string;
   transferOutId?: string;
   transferInId?: string;
@@ -937,9 +947,13 @@ export interface Settings {
   insightsOverviewLayout?: Record<string, unknown> | null;
   /** Read-only restore state, absent on older backends. */
   restoreReconnectRequired?: boolean;
+  /** Theme ID (palette and shape); absent on older backends, which show Classic. */
+  themeId?: string;
+  /** Appearance mode: light, dark or system. */
   theme: string;
-  chartPalette: "sage" | "amber" | "newspaper" | "cyberpunk";
   font: string;
+  /** Text size name; absent on older backends, which show the default size. */
+  textSize?: string;
   language: string;
   formattingRegion: string;
   /** Formatting regions for amounts in specific currencies, keyed by currency code. */
@@ -1638,10 +1652,12 @@ export interface BreakdownItem {
   category: string;
   /** Display name */
   name: string;
-  /** Value in base currency (positive magnitude) as decimal string */
-  value: string;
+  /** Value in base currency (positive magnitude) */
+  value: number;
   /** Optional: asset ID for individual items */
   assetId?: string;
+  /** First day the item carried a balance (YYYY-MM-DD), when known. */
+  firstValueDate?: string;
   /** Individual items rolled up into this category, for drill-down. */
   children?: BreakdownItem[];
 }
@@ -1650,8 +1666,8 @@ export interface BreakdownItem {
  * Assets section of the balance sheet
  */
 export interface AssetsSection {
-  /** Total assets value in base currency as decimal string */
-  total: string;
+  /** Total assets value in base currency */
+  total: number;
   /** Breakdown by category */
   breakdown: BreakdownItem[];
 }
@@ -1660,8 +1676,8 @@ export interface AssetsSection {
  * Liabilities section of the balance sheet
  */
 export interface LiabilitiesSection {
-  /** Total liabilities value in base currency as decimal string */
-  total: string;
+  /** Total liabilities value in base currency */
+  total: number;
   /** Breakdown by individual liability */
   breakdown: BreakdownItem[];
 }
@@ -1676,8 +1692,8 @@ export interface NetWorthResponse {
   assets: AssetsSection;
   /** Liabilities section with total and breakdown */
   liabilities: LiabilitiesSection;
-  /** Net worth (assets - liabilities) as decimal string */
-  netWorth: string;
+  /** Net worth (assets - liabilities) */
+  netWorth: number;
   /** Base currency used for the calculation */
   currency: string;
   /** Oldest valuation date used in the calculation */
@@ -1695,30 +1711,30 @@ export interface NetWorthHistoryPoint {
   date: string;
 
   // Component values
-  /** Portfolio value from aggregated real-account valuations as decimal string */
-  portfolioValue: string;
-  /** Alternative assets value (properties, vehicles, collectibles, etc.) as decimal string */
-  alternativeAssetsValue: string;
-  /** Total liabilities as decimal string (positive magnitude, subtracted for net worth) */
-  totalLiabilities: string;
+  /** Portfolio value from aggregated real-account valuations */
+  portfolioValue: number;
+  /** Alternative assets value (properties, vehicles, collectibles, etc.) */
+  alternativeAssetsValue: number;
+  /** Total liabilities (positive magnitude, subtracted for net worth) */
+  totalLiabilities: number;
 
   // Totals
-  /** Total assets = portfolio_value + alternative_assets_value as decimal string */
-  totalAssets: string;
-  /** Net worth (assets - liabilities) as decimal string */
-  netWorth: string;
+  /** Total assets = portfolio_value + alternative_assets_value */
+  totalAssets: number;
+  /** Net worth (assets - liabilities) */
+  netWorth: number;
 
   // For gain calculation
-  /** Cumulative net contributions (deposits - withdrawals) from portfolio as decimal string */
-  netContribution: string;
+  /** Cumulative net contributions (deposits - withdrawals) from portfolio */
+  netContribution: number;
 
   /**
-   * Per-category / per-liability values at this date as decimal strings.
+   * Per-category / per-liability values at this date.
    * Keys mirror the point-in-time breakdown: asset category keys (`cash`,
    * `investments`, `properties`, ...) for aggregated asset categories, and the
    * individual liability id (matching `BreakdownItem.assetId`) for each liability.
    */
-  breakdown: Record<string, string>;
+  breakdown: Record<string, number>;
 
   /** Currency */
   currency: string;
@@ -2688,7 +2704,6 @@ export interface SaveUpProjectionPointDTO extends SaveUpTrajectoryPointDTO {
 export type TargetScopeType = "all" | "portfolio" | "account";
 export type TriggerType = "manual" | "threshold";
 export type RebalanceGoal = "nearest_band" | "exact_target";
-export type ScenarioMode = "cash_flow_only" | "sell_to_rebalance" | "hybrid";
 export type DriftStatus = "in_band" | "underweight" | "overweight" | "not_targeted";
 export type RebalanceTo = "nearest_band" | "exact_target";
 
@@ -2829,44 +2844,214 @@ export interface DriftHoldingsReport {
   rows: DriftHoldingRow[];
 }
 
-export type RebalanceWarningKind =
-  | "missing_quote"
-  | "no_buy_candidate"
-  | "tagged_cash"
-  | "unclassified_asset"
-  | "partial_classification"
-  | "constraint_skipped_sell"
-  | "turnover_cap_reached";
+// ── Calculated rebalancing worksheet ─────────────────────────────────────────
 
-export interface RebalanceWarning {
-  kind: RebalanceWarningKind;
-  categoryId: string;
-  message: string;
-}
+export type WorksheetMode = "invest_cash" | "rebalance";
+export type AllocationRule = "current_holding_proportions";
+export type WorksheetDirection = "increase" | "reduce";
+export type WorksheetInputMode = "amount" | "quantity";
+export type UnresolvedReason = "no_recorded_security" | "no_eligible_security" | "no_usable_price";
 
-export interface SuggestedManualTrade {
-  action: string;
+export interface UnresolvedCategoryAmount {
   categoryId: string;
   categoryName: string;
-  assetId?: string | null;
-  accountId?: string | null;
-  holdingId?: string | null;
-  symbol?: string | null;
-  name?: string | null;
-  quantity?: number | null;
-  estimatedPrice?: number | null;
-  estimatedAmount: number;
-  reason: string;
+  amount: number;
+  reason: UnresolvedReason;
 }
 
-export interface RebalancePlan {
-  targetId: string;
+export interface AdjustmentScaling {
+  /** The share of the category gaps the selected cash covers, when it covers less than all. */
+  cashFactor?: number | null;
+  reductionFactor?: number | null;
+  increaseFactor?: number | null;
+}
+
+export interface BelowOneUnitSecurity {
+  assetId: string;
+  symbol: string;
+  /** Signed amount it came to before the quantity was floored. */
+  amount: number;
+}
+
+export interface CalculatedAdjustment {
+  lineId: string;
+  direction: WorksheetDirection;
+  assetId: string;
+  symbol: string;
+  /** Null when several accounts could receive the increase and the user places it. */
+  accountId?: string | null;
+  /** Signed, in base currency. Negative for a reduction. */
+  amount: number;
+  quantity: number;
+  unitPrice: number;
+  isBelowMinimum: boolean;
+}
+
+export interface AccountFundingShortfall {
+  accountId: string;
+  required: number;
+  available: number;
+}
+
+export interface CalculatedAdjustments {
+  mode: WorksheetMode;
+  rule: AllocationRule;
+  adjustments: CalculatedAdjustment[];
+  unresolved: UnresolvedCategoryAmount[];
+  scaling: AdjustmentScaling;
+  remainingCash: number;
+  fundingShortfalls: AccountFundingShortfall[];
+  /** Securities sized below one whole unit. Absent from drafts saved before it existed. */
+  belowOneUnit?: BelowOneUnitSecurity[];
+}
+
+export interface WorksheetCashInput {
+  trackedCashToUse: number;
+  /** Hypothetical cash not recorded anywhere, keyed by the account it would arrive in. */
+  externalContribution: Record<string, number>;
+  /**
+   * Tracked cash each selected account may spend. When present it replaces
+   * `trackedCashToUse`: an account left out spends none, and each account's
+   * funding is checked against its own amount.
+   */
+  trackedCashByAccount?: Record<string, number>;
+}
+
+export interface AllocationWorksheetLineInput {
+  lineId: string;
+  direction: WorksheetDirection;
+  assetId: string;
+  /** Omitted for an indicative portfolio preview before account placement. */
+  accountId?: string;
+  inputMode: WorksheetInputMode;
+  value: number;
+}
+
+export type WorksheetWarningKind =
+  | "stale_quote"
+  | "stale_fx"
+  | "partial_classification"
+  | "unclassified_asset"
+  | "external_contribution"
+  | "below_minimum_line"
+  | "turnover_exceeded"
+  | "avoid_constraint"
+  | "insufficient_funding"
+  | "account_funding"
+  | "cash_unavailable"
+  | "below_one_unit";
+
+/** The figures a warning states. Amounts are in the planning currency. */
+export interface WorksheetWarningFacts {
+  amount?: number;
+  limit?: number;
+  unitPrice?: number;
+  shareBps?: number;
+  limitBps?: number;
+  accountId?: string;
+  /** The date a dated price or rate is from. */
+  asOf?: string;
+  reason?: string;
+}
+
+export interface WorksheetWarning {
+  id: string;
+  kind: WorksheetWarningKind;
+  lineId?: string | null;
+  /** The core's English wording; the worksheet words the facts itself. */
+  message: string;
+  facts?: WorksheetWarningFacts;
+  acknowledgementRequired: boolean;
+}
+
+export interface WorksheetPricingSource {
+  id: string;
+  sourceType: string;
+  value: number;
+  fromCurrency: string;
+  toCurrency: string;
+  timestamp: string;
+  isStale: boolean;
+}
+
+export interface WorksheetCategoryExposure {
+  categoryId: string;
+  categoryName: string;
+  weightBps: number;
+  valueDelta: number;
+  isUnclassified: boolean;
+}
+
+export interface AllocationWorksheetLineResult {
+  lineId: string;
+  direction: WorksheetDirection;
+  assetId: string;
+  accountId: string | null;
+  symbol: string;
+  name: string;
+  inputMode: WorksheetInputMode;
+  inputValue: number;
+  quantity: number;
+  unitPrice: number;
+  estimatedAmount: number;
+  contractMultiplier: number;
+  quoteSource: WorksheetPricingSource;
+  fxSource?: WorksheetPricingSource | null;
+  categoryExposures: WorksheetCategoryExposure[];
+}
+
+export interface WorksheetCategoryResult {
+  categoryId: string;
+  categoryName: string;
+  color: string;
+  targetBps: number;
+  currentValue: number;
+  projectedValue: number;
+  currentBps: number;
+  projectedBps: number;
+  currentDifferenceBps: number;
+  projectedDifferenceBps: number;
+  isCash: boolean;
+  isUnclassified: boolean;
+}
+
+export interface WorksheetSourceRecord {
+  sourceType: string;
+  id: string;
+  version: string;
+  details: string;
+}
+
+/** Where one account stands once the worksheet is applied. A negative `remaining` is funding the account needs. */
+export interface WorksheetAccountFunding {
+  accountId: string;
   availableCash: number;
-  cashUsed: number;
+  externalCash: number;
+  reductionProceeds: number;
+  increases: number;
+  remaining: number;
+}
+
+export interface AllocationWorksheetResult {
+  targetId: string;
+  targetName: string;
+  baseCurrency: string;
+  calculatedAt: string;
+  sourceFingerprint: string;
+  resolvedAccountIds: string[];
+  observedTrackedCash: number;
+  /** What each selected account records, before any amount set for it. */
+  recordedCashByAccount: Record<string, number>;
+  trackedCashToUse: number;
+  externalContribution: number;
+  increaseTotal: number;
+  reductionTotal: number;
   cashRemaining: number;
-  maxDriftBpsBefore: number;
-  maxDriftBpsAfter: number;
-  trades: SuggestedManualTrade[];
-  warnings: RebalanceWarning[];
-  afterBpsByCategory: Record<string, number>;
+  maxDifferenceBpsBefore: number;
+  maxDifferenceBpsAfter: number;
+  lines: AllocationWorksheetLineResult[];
+  categories: WorksheetCategoryResult[];
+  accountFunding: WorksheetAccountFunding[];
+  warnings: WorksheetWarning[];
+  sourceRecords: WorksheetSourceRecord[];
 }

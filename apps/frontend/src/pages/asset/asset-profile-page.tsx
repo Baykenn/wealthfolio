@@ -54,6 +54,7 @@ import type { TFunction } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useBackNavigation } from "@/pages/layouts/mobile-stack/use-mobile-stack";
 import { toast } from "sonner";
 import { AlternativeAssetContent, useAlternativeAssetActions } from "./alternative-asset-content";
 import { AssetSnapshotHistory, useHasManualSnapshots } from "./asset-account-holdings";
@@ -895,7 +896,9 @@ export const AssetProfilePage = () => {
                 <Badge
                   key={badge.id}
                   variant="secondary"
-                  className="gap-1.5"
+                  // A long category name ends in an ellipsis rather than past the screen.
+                  className="max-w-full gap-1.5"
+                  title={badge.categoryName}
                   style={{
                     backgroundColor: `${badge.categoryColor}20`,
                     color: badge.categoryColor,
@@ -903,10 +906,10 @@ export const AssetProfilePage = () => {
                   }}
                 >
                   <span
-                    className="h-2 w-2 rounded-full"
+                    className="h-2 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: badge.categoryColor }}
                   />
-                  {badge.categoryName}
+                  <span className="truncate">{badge.categoryName}</span>
                 </Badge>
               ))}
               <Button
@@ -1068,9 +1071,7 @@ export const AssetProfilePage = () => {
     setRefreshConfirmOpen(true);
   }, []);
 
-  const handleBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+  const handleBack = useBackNavigation();
 
   const handleCopySymbol = useCallback(async () => {
     try {
@@ -1580,7 +1581,7 @@ export const AssetProfilePage = () => {
             {/* Provider names read in their own direction, so a clipped one keeps its start. */}
             <h1
               dir="auto"
-              className="truncate text-base font-semibold leading-tight md:text-lg rtl:text-right"
+              className="truncate text-base leading-tight font-semibold md:text-lg rtl:text-right"
             >
               {assetProfile?.name ?? holding?.instrument?.name ?? assetId ?? "-"}
             </h1>

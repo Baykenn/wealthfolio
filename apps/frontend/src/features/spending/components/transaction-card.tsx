@@ -15,6 +15,7 @@ import {
 } from "../lib/transactions-helpers";
 import { ActionPalette } from "@/components/action-palette";
 
+import { CategoryIcon } from "./category-chips";
 import { QuickCategorizePopover } from "./quick-categorize-popover";
 import { SelectionCheckbox } from "./selection-checkbox";
 import { QuickEventPopover } from "./quick-event-popover";
@@ -160,7 +161,7 @@ function TransactionCardImpl({
           <div className="text-muted-foreground text-2xs mt-0.5 flex items-center gap-1.5">
             <span className="shrink-0">{time}</span>
             <span aria-hidden="true">·</span>
-            {isNeutral ? (
+            {isNeutral && row.splitCount === 0 ? (
               <span className="shrink-0">{t("spending:transactions.neutral")}</span>
             ) : row.splitCount > 0 ? (
               <button type="button" className={INLINE} onClick={() => onEditSplits(row)}>
@@ -189,13 +190,15 @@ function TransactionCardImpl({
                   >
                     {row.category ? (
                       <>
-                        {row.category.color && (
-                          <span
-                            className="h-2 w-2 shrink-0 rounded-full"
-                            style={{ backgroundColor: row.category.color }}
-                            aria-hidden="true"
-                          />
-                        )}
+                        {/* A tile is too small to read at this size; the bare icon
+                            fits the 16px meta line like the split icon does. */}
+                        <span
+                          className="shrink-0"
+                          style={{ color: row.category.color ?? undefined }}
+                          aria-hidden="true"
+                        >
+                          <CategoryIcon icon={row.category.icon} className="h-3.5 w-3.5" />
+                        </span>
                         <span className="truncate">{row.category.name}</span>
                       </>
                     ) : (

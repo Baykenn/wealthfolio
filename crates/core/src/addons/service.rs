@@ -17,7 +17,7 @@ pub const ADDON_STORE_API_BASE_URL: &str = "https://wealthfolio.app/api/addons";
 const MAX_ADDON_ARCHIVE_ENTRIES: usize = 256;
 const MAX_ADDON_ARCHIVE_FILE_SIZE: u64 = 5 * 1024 * 1024;
 const MAX_ADDON_ARCHIVE_TOTAL_SIZE: u64 = 25 * 1024 * 1024;
-const MAX_ADDON_ARCHIVE_COMPRESSED_SIZE: usize = 50 * 1024 * 1024;
+pub const MAX_ADDON_ARCHIVE_COMPRESSED_SIZE: usize = 50 * 1024 * 1024;
 const MAX_ADDON_STORAGE_KEY_LEN: usize = 128;
 /// Upper bound on the serialized `{addon_id, key, value}` sync payload — NOT the
 /// raw value length. A storage write emits a device-sync outbox event whose
@@ -254,7 +254,12 @@ pub fn detect_addon_permissions(addon_files: &[AddonFile]) -> Vec<AddonPermissio
         (
             "activities",
             "spending",
-            vec!["searchCashActivities"],
+            vec![
+                "searchCashActivities",
+                "assignCategory",
+                "unassignCategory",
+                "setEvent",
+            ],
             "Access to categorized spending transactions",
         ),
         (
@@ -329,6 +334,10 @@ pub fn detect_addon_permissions(addon_files: &[AddonFile]) -> Vec<AddonPermissio
             vec![
                 "isEnabled",
                 "getCategories",
+                "getContext",
+                "getBudget",
+                "getEvents",
+                "getEventTypes",
                 "getReport",
                 "getRules",
                 "saveRule",
@@ -336,6 +345,12 @@ pub fn detect_addon_permissions(addon_files: &[AddonFile]) -> Vec<AddonPermissio
                 "rerunRules",
             ],
             "Access to spending reports, categories, and categorization rules",
+        ),
+        (
+            "budgets",
+            "spending",
+            vec!["upsertBudgetTarget"],
+            "Change default and monthly budget targets",
         ),
         (
             "settings",
@@ -850,7 +865,8 @@ fn extract_addon_zip_archive(zip_data: Vec<u8>) -> Result<ExtractedAddonArchive,
             continue;
         }
 
-        let file_name = file.name().to_string();
+        // Archives zipped on Windows (e.g. Compress-Archive) use '\\' as separator.
+        let file_name = file.name().replace('\\', "/");
         validated_addon_archive_path(&file_name)?;
 
         if file_name.ends_with(".map") {

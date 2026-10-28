@@ -11,7 +11,7 @@ use wealthfolio_core::assets::AssetKind;
 use wealthfolio_core::errors::Result;
 use wealthfolio_core::settings::{
     Settings, SettingsRepositoryTrait, SettingsUpdate, CURRENCY_FORMATTING_REGIONS_KEY,
-    INSIGHTS_OVERVIEW_LAYOUT_KEY,
+    DEFAULT_THEME_ID, INSIGHTS_OVERVIEW_LAYOUT_KEY, TEXT_SIZE_KEY, THEME_ID_KEY,
 };
 
 pub struct SettingsRepository {
@@ -39,9 +39,10 @@ impl SettingsRepositoryTrait for SettingsRepository {
 
         for (key, value) in all_settings {
             match key.as_str() {
+                THEME_ID_KEY => settings.theme_id = value,
                 "theme" => settings.theme = value,
-                "chart_palette" => settings.chart_palette = value,
                 "font" => settings.font = value,
+                TEXT_SIZE_KEY => settings.text_size = Some(value),
                 "language" => settings.language = value,
                 "formatting_region" => settings.formatting_region = value,
                 CURRENCY_FORMATTING_REGIONS_KEY => {
@@ -80,6 +81,16 @@ impl SettingsRepositoryTrait for SettingsRepository {
         let settings = new_settings.clone();
         self.writer
             .exec_tx(move |tx| {
+                if let Some(ref theme_id) = settings.theme_id {
+                    diesel::replace_into(app_settings)
+                        .values(&AppSettingDB {
+                            setting_key: THEME_ID_KEY.to_string(),
+                            setting_value: theme_id.clone(),
+                        })
+                        .execute(tx.conn())
+                        .map_err(StorageError::from)?;
+                }
+
                 if let Some(ref theme) = settings.theme {
                     diesel::replace_into(app_settings)
                         .values(&AppSettingDB {
@@ -90,21 +101,22 @@ impl SettingsRepositoryTrait for SettingsRepository {
                         .map_err(StorageError::from)?;
                 }
 
-                if let Some(ref chart_palette) = settings.chart_palette {
-                    diesel::replace_into(app_settings)
-                        .values(&AppSettingDB {
-                            setting_key: "chart_palette".to_string(),
-                            setting_value: chart_palette.clone(),
-                        })
-                        .execute(tx.conn())
-                        .map_err(StorageError::from)?;
-                }
 
                 if let Some(ref font) = settings.font {
                     diesel::replace_into(app_settings)
                         .values(&AppSettingDB {
                             setting_key: "font".to_string(),
                             setting_value: font.clone(),
+                        })
+                        .execute(tx.conn())
+                        .map_err(StorageError::from)?;
+                }
+
+                if let Some(ref text_size) = settings.text_size {
+                    diesel::replace_into(app_settings)
+                        .values(&AppSettingDB {
+                            setting_key: TEXT_SIZE_KEY.to_string(),
+                            setting_value: text_size.clone(),
                         })
                         .execute(tx.conn())
                         .map_err(StorageError::from)?;
@@ -245,8 +257,8 @@ impl SettingsRepositoryTrait for SettingsRepository {
             Err(diesel::result::Error::NotFound) => {
                 // Return default values for known settings
                 let default_value = match setting_key_param {
+                    THEME_ID_KEY => DEFAULT_THEME_ID,
                     "theme" => "light",
-                    "chart_palette" => "sage",
                     "font" => "font-mono",
                     "language" => "en",
                     "timezone" => "",
@@ -406,6 +418,51 @@ mod tests {
         let mut conn = get_connection(&repo.pool).unwrap();
         let outbox: i64 = sync_outbox::table.count().get_result(&mut conn).unwrap();
         assert_eq!(outbox, 0, "Formatting preferences stay on this device");
+    }
+
+    #[tokio::test]
+    async fn theme_id_defaults_to_classic_and_survives_unrelated_updates() {
+        use crate::schema::sync_outbox;
+        let (repo, _dir) = setup().await;
+        assert_eq!(repo.get_settings().unwrap().theme_id, DEFAULT_THEME_ID);
+        assert_eq!(repo.get_setting(THEME_ID_KEY).unwrap(), DEFAULT_THEME_ID);
+
+        let update =
+            serde_json::from_value(json!({"themeId": "ember", "theme": "system"})).unwrap();
+        repo.update_settings(&update).await.unwrap();
+        let mode = serde_json::from_value(json!({"theme": "dark", "font": "font-sans"})).unwrap();
+        repo.update_settings(&mode).await.unwrap();
+
+        let settings = repo.get_settings().unwrap();
+        assert_eq!(settings.theme_id, "ember");
+        assert_eq!(settings.theme, "dark");
+        assert_eq!(settings.font, "font-sans");
+
+        let mut conn = get_connection(&repo.pool).unwrap();
+        let outbox: i64 = sync_outbox::table.count().get_result(&mut conn).unwrap();
+        assert_eq!(outbox, 0, "The theme stays on this device");
+    }
+
+    #[tokio::test]
+    async fn text_size_is_unset_until_picked_and_stays_on_this_device() {
+        use crate::schema::sync_outbox;
+        let (repo, _dir) = setup().await;
+        assert_eq!(repo.get_settings().unwrap().text_size, None);
+        assert!(repo.get_setting(TEXT_SIZE_KEY).is_err());
+
+        let update = serde_json::from_value(json!({"textSize": "extra-large"})).unwrap();
+        repo.update_settings(&update).await.unwrap();
+        let unrelated =
+            serde_json::from_value(json!({"theme": "dark", "themeId": "ember"})).unwrap();
+        repo.update_settings(&unrelated).await.unwrap();
+
+        let settings = repo.get_settings().unwrap();
+        assert_eq!(settings.text_size.as_deref(), Some("extra-large"));
+        assert_eq!(settings.theme_id, "ember");
+
+        let mut conn = get_connection(&repo.pool).unwrap();
+        let outbox: i64 = sync_outbox::table.count().get_result(&mut conn).unwrap();
+        assert_eq!(outbox, 0, "The text size stays on this device");
     }
 
     #[tokio::test]

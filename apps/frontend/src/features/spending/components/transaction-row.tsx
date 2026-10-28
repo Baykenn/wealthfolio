@@ -28,6 +28,7 @@ import {
   isTransferCashActivity,
   type TransactionRowVM,
 } from "../lib/transactions-helpers";
+import { CategoryIconTile } from "./category-chips";
 import { QuickCategorizePopover } from "./quick-categorize-popover";
 import { QuickEventPopover } from "./quick-event-popover";
 import {
@@ -137,7 +138,7 @@ function TransactionRowImpl({
           className={SELECTION_SLOT}
         />
       </TableCell>
-      <TableCell className="text-muted-foreground hidden w-20 whitespace-nowrap px-3 py-2 text-xs tabular-nums md:table-cell">
+      <TableCell className="text-muted-foreground hidden w-20 px-3 py-2 text-xs whitespace-nowrap tabular-nums md:table-cell">
         {time}
       </TableCell>
       {/* `max-w-0` hands this column whatever width the fixed-width columns
@@ -195,7 +196,7 @@ function TransactionRowImpl({
         </div>
       </TableCell>
       <TableCell className="hidden w-44 px-3 py-2 sm:table-cell">
-        {isNeutral ? (
+        {isNeutral && row.splitCount === 0 ? (
           <span className="text-muted-foreground text-xs">
             {t("spending:transactions.neutral")}
           </span>
@@ -228,13 +229,13 @@ function TransactionRowImpl({
               >
                 {row.category ? (
                   <>
-                    {row.category.color && (
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: row.category.color }}
-                        aria-hidden="true"
-                      />
-                    )}
+                    {/* h-5 matches the text-sm line height, so the row keeps its height. */}
+                    <CategoryIconTile
+                      icon={row.category.icon}
+                      color={row.category.color}
+                      className="h-5 w-5"
+                      iconClassName="h-3 w-3"
+                    />
                     <span className="truncate text-sm">{row.category.name}</span>
                   </>
                 ) : (
@@ -264,7 +265,7 @@ function TransactionRowImpl({
         <PrivacyAmount value={Math.abs(safeAmount)} currency={a.currency} />
       </TableCell>
       {showBalance && (
-        <TableCell className="text-muted-foreground hidden w-28 whitespace-nowrap px-3 py-2 text-end text-sm tabular-nums sm:table-cell">
+        <TableCell className="text-muted-foreground hidden w-28 px-3 py-2 text-end text-sm whitespace-nowrap tabular-nums sm:table-cell">
           {a.cashBalance != null && a.cashBalanceCurrency && (
             <PrivacyAmount value={Number(a.cashBalance)} currency={a.cashBalanceCurrency} />
           )}
