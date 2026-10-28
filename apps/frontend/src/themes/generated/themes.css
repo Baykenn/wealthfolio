@@ -1175,6 +1175,8 @@
   --chart-stone: hsl(44 3% 38%);
   --net-worth: hsl(50 8% 88%);
   --heatmap-accent: hsl(50 8% 88%);
+  --heatmap-positive-low: #8a877f;
+  --heatmap-positive-high: #f2f0e5;
   --heatmap-negative-low: #f2a493;
   --heatmap-negative-high: #c4402f;
 }
@@ -1310,6 +1312,8 @@
   --chart-stone: hsl(49 8% 60%);
   --net-worth: #5abdac;
   --heatmap-accent: #3aa99f;
+  --heatmap-positive-high: #3aa99f;
+  --heatmap-negative-high: #ce5d97;
 }
 
 [data-theme-preview="cyber"] {

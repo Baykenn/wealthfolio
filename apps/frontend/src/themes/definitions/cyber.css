@@ -102,4 +102,8 @@
   --chart-stone: hsl(49 8% 60%);
   --net-worth: #5abdac;
   --heatmap-accent: #3aa99f;
+  /* The treemap at 0.45 over the dark card: the 700 high stops sink into it, so
+     dark ends on the 400s, as Classic's dark ramp does. */
+  --heatmap-positive-high: #3aa99f;
+  --heatmap-negative-high: #ce5d97;
 }
