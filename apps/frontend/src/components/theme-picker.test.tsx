@@ -115,7 +115,6 @@ describe("ThemePicker", () => {
       ember: "font-serif",
       signature: "font-sans",
       cupertino: "font-sans",
-      amber: "font-serif",
       newspaper: "font-serif",
       cyber: "font-serif",
     });
