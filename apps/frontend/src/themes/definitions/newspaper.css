@@ -111,7 +111,11 @@
   --chart-stone: hsl(44 3% 38%);
   --net-worth: hsl(50 8% 88%);
   --heatmap-accent: hsl(50 8% 88%);
-  /* Dark tiles draw at 0.45 over the card, so the red is stronger to keep its hue. */
+  /* Dark tiles draw at 0.45 over the card: gains run from gray to paper white, so
+     the strongest stand out instead of sinking into the card as ink does, and the
+     red is stronger to keep its hue. */
+  --heatmap-positive-low: #8a877f;
+  --heatmap-positive-high: #f2f0e5;
   --heatmap-negative-low: #f2a493;
   --heatmap-negative-high: #c4402f;
 }

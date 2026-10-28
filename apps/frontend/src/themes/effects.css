@@ -61,17 +61,22 @@
 }
 
 /* Sidebar active nav item: icon stays tinted + glowing (not just on hover),
-   plus a subtle glowing underline instead of a full glow halo around the button. */
-[data-theme="cyber"] .app-sidebar [aria-current="page"] {
+   plus a subtle glowing underline instead of a full glow halo around the button.
+   The Add-ons menu trigger has no page of its own, so it marks an open add-on
+   with data-active instead of aria-current. */
+[data-theme="cyber"] .app-sidebar [aria-current="page"],
+[data-theme="cyber"] .app-sidebar [data-active] {
   position: relative;
 }
 
-[data-theme="cyber"] .app-sidebar [aria-current="page"] svg {
+[data-theme="cyber"] .app-sidebar [aria-current="page"] svg,
+[data-theme="cyber"] .app-sidebar [data-active] svg {
   color: var(--chart-1);
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--chart-1) 70%, transparent));
 }
 
-[data-theme="cyber"] .app-sidebar [aria-current="page"]::after {
+[data-theme="cyber"] .app-sidebar [aria-current="page"]::after,
+[data-theme="cyber"] .app-sidebar [data-active]::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -218,8 +223,9 @@
 }
 
 /* Skip the ambient glow on the dashboard view — too busy alongside its own
-   charts/gauges. */
-[data-theme="cyber"] .main-content:has(.dashboard-page)::after {
+   charts/gauges. On mobile, screens left behind stay mounted but inert, so only
+   a dashboard outside an inert screen counts. */
+[data-theme="cyber"] .main-content:has(.dashboard-page:not([inert] *))::after {
   display: none;
 }
 
