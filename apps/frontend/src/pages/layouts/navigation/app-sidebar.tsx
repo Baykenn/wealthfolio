@@ -323,6 +323,7 @@ function AddonsMenu({ addons, collapsed, onSetPinned }: AddonsMenuProps) {
         render={
           <Button
             variant={hasActiveAddon ? "secondary" : "ghost"}
+            data-active={hasActiveAddon || undefined}
             className={cn(
               "text-foreground [&_svg]:size-5! mb-1 h-12 rounded-md transition-all duration-300",
               collapsed ? "justify-center" : "justify-start",
