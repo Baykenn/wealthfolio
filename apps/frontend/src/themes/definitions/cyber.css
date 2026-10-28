@@ -1,9 +1,7 @@
 /* @name Cyber */
 /* @mode dark */
 /* Neon two-tone: cyan, blue, purple and magenta from the Flexoki extended
-   palette, with gain and loss in cyan and magenta app-wide. The glows, the
-   ambient light and the glitching logo are rules, not roles
-   (src/themes/effects.css). */
+   palette, with gain and loss in cyan and magenta app-wide. */
 :root {
   /* Classic's Flexoki surfaces, which this theme keeps; it changes the data colours. */
   --background: hsl(var(--flexoki-bg));
