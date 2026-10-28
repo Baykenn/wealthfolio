@@ -1,7 +1,8 @@
 /* @name Newspaper */
 /* @mode light */
 /* Monochrome print: a grayscale chart ombre (the pre-v3.5 light-mode hues),
-   square column-box corners and ruled cards instead of drop shadows. */
+   square column-box corners and ruled cards instead of drop shadows. The paper
+   grain is a rule, not a role (src/themes/effects.css). */
 :root {
   --radius: 0rem;
   --button-radius: 0rem;
