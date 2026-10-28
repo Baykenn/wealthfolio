@@ -14,4 +14,7 @@ export const themes: readonly ThemeDefinition[] = [
   { id: "signature", name: "Signature", font: "font-sans" },
   { id: "ember", name: "Ember" },
   { id: "cupertino", name: "Cupertino", font: "font-sans" },
+  { id: "amber", name: "Amber" },
+  { id: "newspaper", name: "Newspaper" },
+  { id: "cyber", name: "Cyber" },
 ];

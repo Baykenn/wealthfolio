@@ -1,0 +1,102 @@
+/* @name Amber */
+/* Classic's Flexoki surfaces with an amber chart ombre (the pre-v3.5 dark-mode
+   hues), the same in both modes so the palette reads the same in light and dark. */
+:root {
+  /* Classic's Flexoki surfaces, which this theme keeps; it changes the data colours. */
+  --background: hsl(var(--flexoki-bg));
+  --foreground: hsl(var(--flexoki-tx));
+  --card: hsl(var(--flexoki-bg-2));
+  --card-foreground: hsl(var(--flexoki-tx));
+  --popover: hsl(var(--flexoki-bg-2));
+  --popover-foreground: hsl(var(--flexoki-tx));
+  --primary: hsl(var(--flexoki-tx));
+  --primary-foreground: hsl(var(--flexoki-bg));
+  --secondary: hsl(var(--flexoki-ui-2));
+  --secondary-foreground: hsl(var(--flexoki-tx-2));
+  --muted: hsl(var(--flexoki-ui));
+  --muted-foreground: hsl(var(--flexoki-tx-2));
+  --accent: hsl(var(--flexoki-ui));
+  --accent-foreground: hsl(var(--flexoki-tx-2));
+  --destructive: hsl(var(--flexoki-re));
+  --border: hsl(var(--flexoki-ui));
+  --input: hsl(var(--flexoki-ui));
+  --ring: hsl(var(--flexoki-tx-2));
+  --sidebar: hsl(var(--flexoki-bg));
+  --sidebar-foreground: hsl(var(--flexoki-tx));
+  --sidebar-primary: hsl(var(--flexoki-tx));
+  --sidebar-primary-foreground: hsl(var(--flexoki-bg));
+  --sidebar-accent: hsl(var(--flexoki-ui));
+  --sidebar-accent-foreground: hsl(var(--flexoki-tx-2));
+  --sidebar-border: hsl(var(--flexoki-ui));
+  --sidebar-ring: hsl(var(--flexoki-tx-2));
+  --chart-1: hsl(25 92% 72%);
+  --chart-2: hsl(24 81% 61%);
+  --chart-3: hsl(23 70% 51%);
+  --chart-4: hsl(23 73% 46%);
+  --chart-5: hsl(22 80% 41%);
+  --chart-6: hsl(22 82% 34%);
+  --chart-7: hsl(22 79% 25%);
+  --chart-8: hsl(22 75% 20%);
+  --chart-9: hsl(22 70% 15%);
+  --chart-stone: hsl(22 82% 34%);
+  /* Net Worth on the deeper amber step, for 3:1 on paper. */
+  --net-worth: hsl(23 73% 46%);
+  --heatmap-accent: #536907;
+  /* Treemap: olive gains and brick losses, Flexoki 150 to 700, in both modes. */
+  --heatmap-positive-low: #cdd597;
+  --heatmap-positive-high: #536907;
+  --heatmap-negative-low: #fdb2a2;
+  --heatmap-negative-high: #942822;
+  /* Treemap middle stops halfway between low and high: one straight blend. */
+  --heatmap-positive-mid: color-mix(
+    in srgb,
+    var(--heatmap-positive-low),
+    var(--heatmap-positive-high)
+  );
+  --heatmap-negative-mid: color-mix(
+    in srgb,
+    var(--heatmap-negative-low),
+    var(--heatmap-negative-high)
+  );
+}
+
+.dark {
+  --background: hsl(var(--flexoki-bg));
+  --foreground: hsl(var(--flexoki-tx));
+  --card: hsl(var(--flexoki-bg-2));
+  --card-foreground: hsl(var(--flexoki-tx));
+  --popover: hsl(var(--flexoki-bg-2));
+  --popover-foreground: hsl(var(--flexoki-tx));
+  --primary: hsl(var(--flexoki-tx));
+  --primary-foreground: hsl(var(--flexoki-bg));
+  --secondary: hsl(var(--flexoki-ui-2));
+  --secondary-foreground: hsl(var(--flexoki-tx-2));
+  --muted: hsl(var(--flexoki-ui));
+  --muted-foreground: hsl(var(--flexoki-tx-2));
+  --accent: hsl(var(--flexoki-ui));
+  --accent-foreground: hsl(var(--flexoki-tx-2));
+  --destructive: hsl(var(--flexoki-re));
+  --border: hsl(var(--flexoki-ui));
+  --input: hsl(var(--flexoki-ui-2));
+  --ring: hsl(var(--flexoki-tx-2));
+  --sidebar: hsl(var(--flexoki-bg));
+  --sidebar-foreground: hsl(var(--flexoki-tx));
+  --sidebar-primary: hsl(var(--flexoki-tx));
+  --sidebar-primary-foreground: hsl(var(--flexoki-bg));
+  --sidebar-accent: hsl(var(--flexoki-ui));
+  --sidebar-accent-foreground: hsl(var(--flexoki-tx-2));
+  --sidebar-border: hsl(var(--flexoki-ui));
+  --sidebar-ring: hsl(var(--flexoki-tx-2));
+  --chart-1: hsl(25 92% 72%);
+  --chart-2: hsl(24 81% 61%);
+  --chart-3: hsl(23 70% 51%);
+  --chart-4: hsl(23 73% 46%);
+  --chart-5: hsl(22 80% 41%);
+  --chart-6: hsl(22 82% 34%);
+  --chart-7: hsl(22 79% 25%);
+  --chart-8: hsl(22 75% 20%);
+  --chart-9: hsl(22 70% 15%);
+  --chart-stone: hsl(22 82% 34%);
+  --net-worth: hsl(25 92% 72%);
+  --heatmap-accent: #879a39;
+}
